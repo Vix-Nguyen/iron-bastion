@@ -440,9 +440,16 @@ function reset() {
 function shuffle() {
   if (mode !== 'stack' || deck.length < 2) return;
   animate(tl => {
-    const mid = Math.floor(deck.length / 2);
-    const left = deck.slice(0, mid);   // bottom half
-    const right = deck.slice(mid);     // top half
+    // One riffle keeps each half's order (the old top/bottom cards stay at the top/bottom),
+    // so randomise with Fisher-Yates first; the riffle animation then plays on that order.
+    const src = deck.slice();
+    for (let i = src.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [src[i], src[j]] = [src[j], src[i]];
+    }
+    const mid = Math.floor(src.length / 2);
+    const left = src.slice(0, mid);   // bottom half
+    const right = src.slice(mid);     // top half
     const SPLIT = 1.4, TILT = 0.12, LIFT = 0.08;
 
     // 1. Split into two halves, tilted toward each other like a riffle.
